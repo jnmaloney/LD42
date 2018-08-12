@@ -1,0 +1,50 @@
+<html>
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>
+    canvas.emscripten {
+        border: 0px none;
+        margin-left:auto;
+        margin-right:auto;
+        display:block
+    }
+    #loadingDiv {
+        text-align: center;
+    }
+</style>
+    </head>
+
+    <body>
+      <div id="loadingDiv">Loading</div>
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+      </div>
+
+
+
+    <script type='text/javascript'>
+        var Module = {
+            onRuntimeInitialized: function() {
+                var e = document.getElementById('loadingDiv');
+                e.style.visibility = 'hidden';
+            }, 
+            canvas: (function() {
+                var canvas = document.getElementById('canvas');
+                return canvas;
+                })()
+        };
+
+        var start_function = function(o) {
+        };
+
+    </script>
+    <script>
+
+          var script = document.createElement('script');
+          script.src = "bossrushzero.js";
+          document.body.appendChild(script);
+
+</script>
+
+    </body>
+</html>
