@@ -43,16 +43,110 @@ void draw()
     g_mapRenderer.m_renderQueue.draw(0, 0, g_rs);
     g_rs->end();
 
-    g_menuLaunch.canLaunch = (g_yourStation.m_dockedShip.docked == 0);
+    int encounter = g_yourStation.m_dockedShip.encounter_type;
+    g_menuLaunch.mod = g_yourStation.m_dockedShip.encounter_mod;
+
+    g_menuLaunch.m_clams = g_yourStation.m_clams;
+    g_menuLaunch.canLaunch = false;
+    g_menuLaunch.empireVisit2 = false;
+    g_menuLaunch.asteroidTime = false;
+    if (encounter == 0)
+    {
+      g_menuLaunch.canLaunch = (g_yourStation.m_dockedShip.docked == 0);
+    }
+    if (encounter == 1)
+    {
+      g_menuLaunch.empireVisit1 = (g_yourStation.m_dockedShip.docked == 0);
+      // Empty ship
+      if (g_yourStation.m_dockedShip.m_objects.size() == 0 && !g_actionManager.m_holding)
+      {
+        g_menuLaunch.m_launch = true;
+        g_menuLaunch.empireVisit1 = false;
+      }
+    }
+    if (encounter == 2)
+    {
+      g_menuLaunch.asteroidTime = true;
+    }
+    if (encounter == 3)
+    {
+      g_menuLaunch.empireVisit2 = (g_yourStation.m_dockedShip.docked == 0);
+    }
+    if (encounter == 4)
+    {
+      g_menuLaunch.repairVisit = (g_yourStation.m_dockedShip.docked == 0);
+    }
+
+    if (g_actionManager.m_holding) g_menuLaunch.holding = g_actionManager.m_heldObject.object_type;
+    else g_menuLaunch.holding = -1;
+    if (g_actionManager.m_returnToShip && g_actionManager.m_heldObject.object_type != g_yourStation.m_dockedShip.encounter_mod) g_menuLaunch.holdingCost = g_actionManager.m_heldObject.cost;
+    else if (g_actionManager.m_returnToStation  && g_actionManager.m_heldObject.object_type == g_yourStation.m_dockedShip.encounter_mod) g_menuLaunch.holdingCost = g_actionManager.m_heldObject.sell_price;
+    else g_menuLaunch.holdingCost = 0;
 
     g_menuManager.predraw();
     g_menuLaunch.frame();
     g_menuManager.postdraw(g_windowManager);
 
+    if (g_menuLaunch.m_trash)
+    {
+      if (g_actionManager.m_returnToStation)
+        g_actionManager.m_holding = false;
+    }
+
+    if (g_menuLaunch.m_repair)
+    {
+      if (g_yourStation.m_clams >= 42)
+      {
+        if (g_actionManager.m_crashed2) { g_actionManager.m_crashed2 = false; g_yourStation.m_clams -= 42; g_actionManager.doMask(); }
+        else if (g_actionManager.m_crashed3) { g_actionManager.m_crashed3 = false; g_yourStation.m_clams -= 42; g_actionManager.doMask(); }
+        else if (g_actionManager.m_crashed1) { g_actionManager.m_crashed1 = false; g_yourStation.m_clams -= 42; g_actionManager.doMask(); }
+      }
+
+      if (g_actionManager.m_crashed1 == false && g_actionManager.m_crashed2 == false && g_actionManager.m_crashed3 == false) g_menuLaunch.m_launch = true;
+    }
+
+    g_menuLaunch.m_gameOver = g_actionManager.gameOver;
+    if (g_menuLaunch.m_restart)
+    {
+      g_actionManager.gameOver = false;
+      g_menuLaunch.m_launch = false;
+      g_menuLaunch.repairVisit = false;
+      g_menuLaunch.asteroidTime = false;
+      g_yourStation.m_clams = 42;
+      g_yourStation.m_empireCounter = 2;
+      g_yourStation.m_asteroidCounter = 1;
+      g_actionManager.m_crashed1 = false;
+      g_actionManager.m_crashed2 = false;
+      g_actionManager.m_crashed3 = false;
+      g_actionManager.m_objects.clear();
+      g_actionManager.m_holding = false;
+      memset(g_actionManager.m_stationArray, 0, 15*15*sizeof(int));
+      memset(g_actionManager.m_shipArray, 0, 15*15*sizeof(int));
+      g_actionManager.doMask();
+      g_menuLaunch.showIntro = true;
+    }
+
     if (g_menuLaunch.m_launch)
     {
+      g_menuLaunch.m_launch = false;
+      g_menuLaunch.repairVisit = false;
+
+      // Last encounter
+      if (encounter == 2)
+        g_actionManager.asteroid_strike();
+      if (encounter == 3)
+        g_actionManager.empire_collect();
+
+      // Next encounter
       g_yourStation.launch();
-      g_actionManager.loadShip();
+      encounter = g_yourStation.m_dockedShip.encounter_type;
+
+      if (encounter == 0)
+        g_actionManager.loadShip();
+      if (encounter == 1)
+        g_actionManager.loadShipEmpire();
+      if (encounter == 2)
+        g_actionManager.asteroid();
     }
 }
 
@@ -102,8 +196,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
   {
   }
 
-  if (button == GLFW_MOUSE_BUTTON_RIGHT)
+  if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
   {
+    g_actionManager.cancel();
   }
 }
 

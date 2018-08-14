@@ -32,6 +32,8 @@ public:
   int j = 0;
   int rotation = 0;
   int colour = 0;
+  int cost = 0;
+  int sell_price = 0;
 };
 
 
@@ -44,6 +46,9 @@ public:
 
   float timer = -1.f;
   int docked = -1;
+
+  int encounter_type = -1;
+  int encounter_mod = 0;
 
   std::vector<StationObject> m_objects;
 };

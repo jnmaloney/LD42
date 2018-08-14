@@ -11,15 +11,12 @@ ActionManager::ActionManager()
   memset(m_stationArray, 0, 15*15*sizeof(int));
   memset(m_shipArray, 0, 15*15*sizeof(int));
 
-  m_stationArray[0][0] = 1;
-  m_stationArray[0][1] = 1;
-  m_stationArray[1][0] = 1;
-  m_stationArray[1][1] = 1;
+  doMask();
 
   // setup
   footprints.resize(7);
   offsets.resize(7);
-  //square_offsets.resize(6);
+  square_offsets.resize(7);
 
   float aaa[16] = {
      0, 0, 0, 0,
@@ -101,11 +98,46 @@ ActionManager::ActionManager()
   offsets[5].push_back(glm::vec3(0.375f, 0.5f, 0.f));
   offsets[5].push_back(glm::vec3(0.25f, 0.375f, 0.f));
 
-  offsets[6].push_back(glm::vec3(0.f, 0.f, 0.f));
-  offsets[6].push_back(glm::vec3(0.f, 0.f, 0.f));
-  offsets[6].push_back(glm::vec3(0.f, 0.f, 0.f));
-  offsets[6].push_back(glm::vec3(0.f, 0.f, 0.f));
+  offsets[6].push_back(glm::vec3(0.25f, 0.25f, 0.f));
+  offsets[6].push_back(glm::vec3(0.5f, 0.25f, 0.f));
+  offsets[6].push_back(glm::vec3(0.5f, 0.5f, 0.f));
+  offsets[6].push_back(glm::vec3(0.25f, 0.5f, 0.f));
 
+
+  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
+  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
+  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
+  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
+
+  square_offsets[1].push_back(glm::vec3(-1, -1, 0));
+  square_offsets[1].push_back(glm::vec3(-1, -2, 0));
+  square_offsets[1].push_back(glm::vec3(-1, -1, 0));
+  square_offsets[1].push_back(glm::vec3(-1, -2, 0));
+
+  square_offsets[2].push_back(glm::vec3(-1, -1, 0));
+  square_offsets[2].push_back(glm::vec3(-2, -2, 0));
+  square_offsets[2].push_back(glm::vec3(-1, -2, 0));
+  square_offsets[2].push_back(glm::vec3(-1, -1, 0));
+
+  square_offsets[3].push_back(glm::vec3(-1, -2, 0));
+  square_offsets[3].push_back(glm::vec3(-2, -1, 0));
+  square_offsets[3].push_back(glm::vec3(-2, -2, 0));
+  square_offsets[3].push_back(glm::vec3(-2, -2, 0));
+
+  square_offsets[4].push_back(glm::vec3(-1, -1, 0));
+  square_offsets[4].push_back(glm::vec3(-2, -1, 0));
+  square_offsets[4].push_back(glm::vec3(-1, -2, 0));
+  square_offsets[4].push_back(glm::vec3(-2, -2, 0));
+
+  square_offsets[5].push_back(glm::vec3(-1, -1, 0));
+  square_offsets[5].push_back(glm::vec3(-1, -2, 0));
+  square_offsets[5].push_back(glm::vec3(-1, -2, 0));
+  square_offsets[5].push_back(glm::vec3(-1, -2, 0));
+
+  square_offsets[6].push_back(glm::vec3(-1, -1, 0));
+  square_offsets[6].push_back(glm::vec3(-2, -1, 0));
+  square_offsets[6].push_back(glm::vec3(-2, -2, 0));
+  square_offsets[6].push_back(glm::vec3(-1, -2, 0));
 }
 
 
@@ -120,14 +152,60 @@ void ActionManager::loadShip()
 
   std::vector<StationObject>& objectsOnShip = m_station->m_dockedShip.m_objects;
 
+  int costs[] = {
+    8,
+    24,
+    8,
+    8,
+    12,
+    10,
+    2,
+  };
+
+  int sells[] = {
+    16,
+    76,
+    16,
+    16,
+    30,
+    23,
+    3
+  };
+
   objectsOnShip.resize(0);
   for (int i = 0; i < 180; ++i)
+  {
+    StationObject o;
+    o.id = ObjectIndexMaker::getNewIndex();
+    o.object_type = dice() % 6;
+    o.rotation = dice() % 4;
+    o.colour = dice() % 24;
+    o.cost = costs[o.object_type];
+    o.sell_price = sells[o.object_type];
+
+    if (m_station->m_dockedShip.encounter_mod == o.object_type) continue;
+
+    int x = dice() % 8;
+    int y = dice() % 4;
+
+    if (canPlace(1, x, y, o))
+    {
+      placeItem(1, x, y, o);
+      objectsOnShip.push_back(o);
+    }
+  }
+
+  for (int i = 0; i < 8; ++i)
   {
     StationObject o;
     o.id = ObjectIndexMaker::getNewIndex();
     o.object_type = dice() % 7;
     o.rotation = dice() % 4;
     o.colour = dice() % 24;
+    o.cost = costs[o.object_type];
+    o.sell_price = sells[o.object_type];
+
+    if (m_station->m_dockedShip.encounter_mod == o.object_type) continue;
 
     int x = dice() % 8;
     int y = dice() % 4;
@@ -143,9 +221,107 @@ void ActionManager::loadShip()
 }
 
 
+void ActionManager::loadShipEmpire()
+{
+  static unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  static std::default_random_engine generator(seed);
+  static std::uniform_int_distribution<int> distribution(1, 600);
+  static auto dice = std::bind ( distribution, generator );
+
+  memset(m_shipArray, 0, 15*15*sizeof(int));
+
+  std::vector<StationObject>& objectsOnShip = m_station->m_dockedShip.m_objects;
+
+  int sells[] = {
+    16,
+    76,
+    16,
+    16,
+    30,
+    23,
+    3
+  };
+
+  objectsOnShip.resize(0);
+  for (int i = 0; i < 180; ++i)
+  {
+    StationObject o;
+    o.id = ObjectIndexMaker::getNewIndex();
+    o.object_type = dice() % 6;
+    o.rotation = dice() % 4;
+    o.colour = 125;
+    o.cost = 0;
+    o.sell_price = sells[o.object_type];
+
+    int x = dice() % 8;
+    int y = dice() % 4;
+
+    if (canPlace(1, x, y, o))
+    {
+      placeItem(1, x, y, o);
+      objectsOnShip.push_back(o);
+    }
+  }
+}
+
+
+void ActionManager::asteroid()
+{
+  static unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  static std::default_random_engine generator(seed);
+  static std::uniform_int_distribution<int> distribution(1, 3);
+  static auto dice = std::bind ( distribution, generator );
+
+  int i = dice();
+
+  if (i == 1 && m_crashed1) ++i;
+  if (i == 2 && m_crashed2) ++i;
+  if (i == 3 && m_crashed3) i = 1;
+  if (i == 1 && m_crashed1) ++i;
+  if (i == 2 && m_crashed2) ++i;
+  if (i == 3 && m_crashed3) gameOver = true;
+
+  m_station->m_dockedShip.encounter_mod = i;
+}
+
+
+void ActionManager::asteroid_strike()
+{
+  int i = m_station->m_dockedShip.encounter_mod;
+
+  if (i == 1) m_crashed1 = true;
+  if (i == 2) m_crashed2 = true;
+  if (i == 3) m_crashed3 = true;
+  doMask();
+}
+
+
 ActionManager::~ActionManager()
 {
 
+}
+
+
+void ActionManager::cancel()
+{
+  // Return home
+  if (m_holding)
+  {
+    m_heldObject.rotation = m_return_rotation;
+    if (m_returnToStation)
+    {
+      placeItem(0, m_return_i, m_return_j, m_heldObject);
+      m_objects.push_back(m_heldObject);
+      //std::cout << " -> Station"<< std::endl;
+    }
+    else if (m_returnToShip)
+    {
+      placeItem(1, m_return_i, m_return_j, m_heldObject);
+      m_station->m_dockedShip.m_objects.push_back(m_heldObject);
+      //std::cout << " -> Ship"<< std::endl;
+    }
+    m_holding = false;
+  }
 }
 
 
@@ -171,45 +347,51 @@ void ActionManager::action()
   // Put down anywhere
   if (m_holding)
   {
+    int di = square_offsets[m_heldObject.object_type][m_heldObject.rotation].x;
+    int dj = square_offsets[m_heldObject.object_type][m_heldObject.rotation].y;
+
     // First.. can it fit here
-    if (canPlace(place, i-2, j-2, m_heldObject))
+    if (canPlace(place, i+di, j+dj, m_heldObject))
     {
-      // Place it
-      placeItem(place, i-2, j-2, m_heldObject);
-      m_holding = false;
-
-      //std::cout << " i " << m_heldObject.i << " j " << m_heldObject.j << std::endl;
-
-      // move lists
-      if (place == 0) // Station -> Ship
+      // Now... do we allow it
+      if ((place == 1 && m_returnToShip) ||   // stay on ship
+          (place == 0 && m_returnToStation) || // stay on platform
+          (place == 0 && m_station->m_clams >= m_heldObject.cost && (m_heldObject.cost==0 || m_heldObject.object_type != m_station->m_dockedShip.encounter_mod)) || // purchase
+          (place == 1 && m_heldObject.cost && m_heldObject.object_type == m_station->m_dockedShip.encounter_mod)) // sell
       {
-        m_objects.push_back(m_heldObject);
-        std::cout << " -> Station"<< std::endl;
-      }
-      if (place == 1) // Ship -> Station
-      {
-        objectsOnShip.push_back(m_heldObject);
-        std::cout << " -> Ship"<< std::endl;
+        // Buy from ship ?
+        if (place == 0 && m_returnToShip)
+        {
+          m_station->m_clams -= m_heldObject.cost;
+        }
+
+        // Sell to ship
+        if (place == 1 && m_returnToStation)
+        {
+          m_station->m_clams += m_heldObject.sell_price;
+        }
+
+        // Place it
+        placeItem(place, i+di, j+dj, m_heldObject);
+        m_holding = false;
+
+        // move lists
+        if (place == 0) // Station -> Ship
+        {
+          m_objects.push_back(m_heldObject);
+          //std::cout << " -> Station"<< std::endl;
+        }
+        if (place == 1) // Ship -> Station
+        {
+          objectsOnShip.push_back(m_heldObject);
+          //std::cout << " -> Ship"<< std::endl;
+        }
       }
     }
     // doesn't fit
     else
     {
-      // Return home
-      m_heldObject.rotation = m_return_rotation;
-      if (m_returnToStation)
-      {
-        placeItem(0, m_return_i, m_return_j, m_heldObject);
-        m_objects.push_back(m_heldObject);
-        std::cout << " -> Station"<< std::endl;
-      }
-      else if (m_returnToShip)
-      {
-        placeItem(1, m_return_i, m_return_j, m_heldObject);
-        objectsOnShip.push_back(m_heldObject);
-        std::cout << " -> Ship"<< std::endl;
-      }
-      m_holding = false;
+
     }
 
 
@@ -451,4 +633,60 @@ float ActionManager::getFootprint(int i, int j, StationObject& o)
   if (o.rotation == 2) x = pFootprint[(3-i)*4 + (3-j)];
   if (o.rotation == 3) x = pFootprint[(3-j)*4 + (i)];
   return x;
+}
+
+
+void ActionManager::doMask()
+{
+  //memset(m_stationArray, 0, 15*15*sizeof(int));
+
+  for (int i = 0; i < 15; ++i)
+  {
+    for (int j = 0; j < 7; ++j)
+    {
+      if (m_stationArray[i][j] == 1) m_stationArray[i][j] = 0;
+
+      if ((m_crashed1 && m_crash1Mask[i][j]) ||
+        (m_crashed2 && m_crash2Mask[i][j]) ||
+        (m_crashed3 && m_crash3Mask[i][j]))
+      {
+        if (m_stationArray[i][j]) crushItem(m_stationArray[i][j]);
+        m_stationArray[i][j] = 1;
+      }
+    }
+  }
+
+  m_stationArray[0][0] = 1;
+  m_stationArray[0][1] = 1;
+  m_stationArray[1][0] = 1;
+  m_stationArray[1][1] = 1;
+}
+
+
+void ActionManager::crushItem(int id)
+{
+  for (int i = 0; i < m_objects.size(); ++i)
+  {
+    if (m_objects[i].id == id)
+    {
+      //std::cout << id << std::endl;
+      clearItem(0, m_objects[i]);
+      m_objects.erase(m_objects.begin() + i);
+      return;
+    }
+  }
+}
+
+
+void ActionManager::empire_collect()
+{
+  for (int i = 0; i < m_objects.size(); ++i)
+  {
+    if (m_objects[i].colour > 25)
+    {
+      m_station->m_clams += m_objects[i].sell_price;
+      crushItem(m_objects[i].id);
+      --i;
+    }
+  }
 }
