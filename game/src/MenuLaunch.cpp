@@ -26,17 +26,48 @@ void MenuLaunch::gameOver()
 void MenuLaunch::frame()
 {
   WindowManager& window = *WindowManager::getInstance();
+  ImVec2 pos(8.f, 8.f);
+  ImVec2 pivot(0, 0);
+
+  // 0.
+  if (showMenu)
+  {
+    pos = ImVec2(0.5 * window.width - 90.f, 0.33 * window.height - 75.f);
+    ImGui::SetNextWindowPos(pos, 0, pivot);
+    ImGui::Begin("Menu", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+    ImGui::Text("");
+    ImGui::Text("Restart?");
+    ImGui::Text("");
+    ImGui::Text("");
+
+    m_restart = ImGui::Button("Yes");
+    ImGui::SameLine(120.f);
+    showMenu = !ImGui::Button("No");
+
+    ImGui::End();
+
+    return;
+  }
+  else if (!showIntro)
+  {
+    pos = ImVec2(window.width - 90.f, 8.f);
+    ImGui::SetNextWindowPos(pos, 0, pivot);
+    ImGui::Begin("Menu", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+    showMenu = ImGui::Button("Menu");
+
+    ImGui::End();
+  }
 
   // 1.
-  ImVec2 pos(0.5f * window.width - 50.f, 8.f);
-  ImVec2 pivot(0, 0);
+  pos = ImVec2(0.5f * window.width - 50.f, 8.f);
   if (!showIntro)
   {
     ImGui::SetNextWindowPos(pos, 0, pivot);
     ImGui::Begin("Clams", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-    std::string blah = std::to_string(m_clams) + std::string(" Clams");
-    ImGui::Text("%s", blah.c_str());
+    ImGui::Text("%i Clams", m_clams);
 
     ImGui::End();
   }
@@ -140,8 +171,9 @@ void MenuLaunch::frame()
   {
     ImGui::Begin("Launch", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-    ImGui::Text("\"Comrade. The Empire");
-    ImGui::Text("has requested that");
+    ImGui::Text("\"Comrade. The");
+    ImGui::Text("Empire has");
+    ImGui::Text("requested that");
     ImGui::Text("these goods need");
     ImGui::Text("storage here.\"");
 
@@ -186,20 +218,38 @@ void MenuLaunch::frame()
   {
     ImGui::Begin("Launch", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-    ImGui::Text("Looks like you need");
-    ImGui::Text("some repairs.");
-    ImGui::Text("");
-    ImGui::Text("");
-
-    if (ImGui::Button("Repair . . . 42 Clams"))
+    if (m_repairEmpty)
     {
-      m_repair = true;
+      ImGui::Text("I'm the  mobile repair");
+      ImGui::Text("ship. I'll come ");
+      ImGui::Text("back when you need ");
+      ImGui::Text("some repairs.");
+      ImGui::Text("");
+
+      if (ImGui::Button("See ya"))
+      {
+        m_launch = true;
+      }
+    }
+    else
+    {
+      ImGui::Text("Looks like you need");
+      ImGui::Text("some repairs.");
+      ImGui::Text("");
+      ImGui::Text("");
+
+      if (ImGui::Button("Repair . . . 42 Clams"))
+      {
+        m_repair = true;
+      }
+      else ImGui::Text("");
+
+      if (ImGui::Button("Take Off"))
+      {
+        m_launch = true;
+      }
     }
 
-    if (ImGui::Button("Take Off"))
-    {
-      m_launch = true;
-    }
     ImGui::End();
   }
 
@@ -222,14 +272,16 @@ void MenuLaunch::frame()
 
   // 3. Mouse
   ImGuiIO& io = ImGui::GetIO();
-  pos = ImVec2(io.MousePos.x - 25.f, io.MousePos.y - 64.f);
+  pos = ImVec2(io.MousePos.x - 25.f, io.MousePos.y - 78.f);
+  if (holdingCost || holdingSell) pos = ImVec2(io.MousePos.x - 25.f, io.MousePos.y - 100.f);
   ImGui::SetNextWindowPos(pos, 0, pivot);
 
   if (holding > -1)
   {
+
     ImGui::Begin("Mouse", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-    std::string cost = std::to_string(holdingCost) + std::string(" Clams");
+    //std::string cost = std::to_string(holdingCost) + std::string(" Clams");
 
     if (holding == 0) ImGui::Text("Box");
     if (holding == 1) ImGui::Text("Big H");
@@ -238,18 +290,19 @@ void MenuLaunch::frame()
     if (holding == 4) ImGui::Text("Big C");
     if (holding == 5) ImGui::Text("Space Fork");
     if (holding == 6) ImGui::Text("Bucket");
-    if (holdingCost) ImGui::Text("%s", cost.c_str());
+    if (holdingCost) ImGui::Text("Buy: %i Clams", holdingCost);
+    if (holdingSell) ImGui::Text("Sell: %i Clams", holdingSell);
     ImGui::End();
   }
 
   // 4. Trash
   m_trash = false;
-  if (holding > -1)
+  if (holding_canTrash)
   {
     pos = ImVec2(15.f, 94.f);
     ImGui::SetNextWindowPos(pos, 0, pivot);
     ImGui::Begin("Junk", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-    m_trash = ImGui::Button("Junk");
+    m_trash = ImGui::Button("Space Junk\n\nDump Item");
     ImGui::End();
   }
 }

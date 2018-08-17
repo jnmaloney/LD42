@@ -11,133 +11,24 @@ ActionManager::ActionManager()
   memset(m_stationArray, 0, 15*15*sizeof(int));
   memset(m_shipArray, 0, 15*15*sizeof(int));
 
+  m_footprints.push_back(Footprint(0));
+  m_footprints.push_back(Footprint(1));
+  m_footprints.push_back(Footprint(2));
+  m_footprints.push_back(Footprint(3));
+  m_footprints.push_back(Footprint(4));
+  m_footprints.push_back(Footprint(5));
+  m_footprints.push_back(Footprint(6));
+
+  // for (int i = 0; i < m_footprints[1].getWidth(); ++i)
+  // {
+  //   for (int j = 0; j < m_footprints[1].getHeight(); ++j)
+  //   {
+  //     std::cout << m_footprints[1].getPoint(i, j);
+  //   }
+  //   std::cout << std::endl;
+  // }
+
   doMask();
-
-  // setup
-  footprints.resize(7);
-  offsets.resize(7);
-  square_offsets.resize(7);
-
-  float aaa[16] = {
-     0, 0, 0, 0,
-     0, 1, 1, 0,
-     0, 1, 1, 0,
-     0, 0, 0, 0
-  };
-  float bbb[16] = {
-     1, 0, 0, 1,
-     1, 1, 1, 1,
-     1, 1, 1, 1,
-     1, 0, 0, 1
-  };
-  float ccc[16] = {
-     0, 1, 0, 0,
-     0, 1, 0, 0,
-     0, 1, 0, 0,
-     0, 1, 0, 0
-  };
-  float ddd[16] = {
-     0, 0, 1, 0,
-     0, 1, 1, 0,
-     0, 1, 0, 0,
-     0, 0, 0, 0
-  };
-  float eee[16] = {
-     0, 1, 1, 0,
-     0, 1, 0, 0,
-     0, 1, 0, 0,
-     0, 1, 1, 0
-  };
-  float fff[16] = {
-     0, 1, 0, 0,
-     0, 1, 0, 0,
-     0, 1, 1, 0,
-     0, 1, 0, 0
-  };
-  float ggg[16] = {
-     0, 0, 0, 0,
-     0, 1, 0, 0,
-     0, 0, 0, 0,
-     0, 0, 0, 0
-  };
-  footprints[0] = glm::make_mat4(aaa);
-  footprints[1] = glm::make_mat4(bbb);
-  footprints[2] = glm::make_mat4(ccc);
-  footprints[3] = glm::make_mat4(ddd);
-  footprints[4] = glm::make_mat4(eee);
-  footprints[5] = glm::make_mat4(fff);
-  footprints[6] = glm::make_mat4(ggg);
-
-  offsets[0].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-  offsets[0].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-  offsets[0].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-  offsets[0].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-
-  offsets[1].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-  offsets[1].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-  offsets[1].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-  offsets[1].push_back(glm::vec3(0.375f, 0.375f, 0.f));
-
-  offsets[2].push_back(glm::vec3(0.375f, 0.25f, 0.f));
-  offsets[2].push_back(glm::vec3(0.5f, 0.375f, 0.f));
-  offsets[2].push_back(glm::vec3(0.375f, 0.5f, 0.f));
-  offsets[2].push_back(glm::vec3(0.25f, 0.375f, 0.f));
-
-  offsets[3].push_back(glm::vec3(0.45f, 0.25f, 0.f));
-  offsets[3].push_back(glm::vec3(0.5f,  0.5f, 0.f));
-  offsets[3].push_back(glm::vec3(0.2f, 0.5f, 0.f));
-  offsets[3].push_back(glm::vec3(0.25f, 0.375f, 0.f));
-
-  offsets[4].push_back(glm::vec3(0.375f, 0.25f, 0.f));
-  offsets[4].push_back(glm::vec3(0.5f, 0.375f, 0.f));
-  offsets[4].push_back(glm::vec3(0.375f, 0.5f, 0.f));
-  offsets[4].push_back(glm::vec3(0.25f, 0.375f, 0.f));
-
-  offsets[5].push_back(glm::vec3(0.375f, 0.25f, 0.f));
-  offsets[5].push_back(glm::vec3(0.5f, 0.375f, 0.f));
-  offsets[5].push_back(glm::vec3(0.375f, 0.5f, 0.f));
-  offsets[5].push_back(glm::vec3(0.25f, 0.375f, 0.f));
-
-  offsets[6].push_back(glm::vec3(0.25f, 0.25f, 0.f));
-  offsets[6].push_back(glm::vec3(0.5f, 0.25f, 0.f));
-  offsets[6].push_back(glm::vec3(0.5f, 0.5f, 0.f));
-  offsets[6].push_back(glm::vec3(0.25f, 0.5f, 0.f));
-
-
-  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
-  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
-  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
-  square_offsets[0].push_back(glm::vec3(-2, -2, 0));
-
-  square_offsets[1].push_back(glm::vec3(-1, -1, 0));
-  square_offsets[1].push_back(glm::vec3(-1, -2, 0));
-  square_offsets[1].push_back(glm::vec3(-1, -1, 0));
-  square_offsets[1].push_back(glm::vec3(-1, -2, 0));
-
-  square_offsets[2].push_back(glm::vec3(-1, -1, 0));
-  square_offsets[2].push_back(glm::vec3(-2, -2, 0));
-  square_offsets[2].push_back(glm::vec3(-1, -2, 0));
-  square_offsets[2].push_back(glm::vec3(-1, -1, 0));
-
-  square_offsets[3].push_back(glm::vec3(-1, -2, 0));
-  square_offsets[3].push_back(glm::vec3(-2, -1, 0));
-  square_offsets[3].push_back(glm::vec3(-2, -2, 0));
-  square_offsets[3].push_back(glm::vec3(-2, -2, 0));
-
-  square_offsets[4].push_back(glm::vec3(-1, -1, 0));
-  square_offsets[4].push_back(glm::vec3(-2, -1, 0));
-  square_offsets[4].push_back(glm::vec3(-1, -2, 0));
-  square_offsets[4].push_back(glm::vec3(-2, -2, 0));
-
-  square_offsets[5].push_back(glm::vec3(-1, -1, 0));
-  square_offsets[5].push_back(glm::vec3(-1, -2, 0));
-  square_offsets[5].push_back(glm::vec3(-1, -2, 0));
-  square_offsets[5].push_back(glm::vec3(-1, -2, 0));
-
-  square_offsets[6].push_back(glm::vec3(-1, -1, 0));
-  square_offsets[6].push_back(glm::vec3(-2, -1, 0));
-  square_offsets[6].push_back(glm::vec3(-2, -2, 0));
-  square_offsets[6].push_back(glm::vec3(-1, -2, 0));
 }
 
 
@@ -243,7 +134,7 @@ void ActionManager::loadShipEmpire()
   };
 
   objectsOnShip.resize(0);
-  for (int i = 0; i < 180; ++i)
+  for (int i = 0; i < 8; ++i)
   {
     StationObject o;
     o.id = ObjectIndexMaker::getNewIndex();
@@ -325,63 +216,76 @@ void ActionManager::cancel()
 }
 
 
+void ActionManager::move_mouse()
+{
+  if (m_holding)
+  {
+    // Offset the cursor based on the footprint
+    float dx = -0.5f * 0.25f * m_footprints[m_heldObject.object_type].getWidth(m_heldObject.rotation);// + 0.125f;
+    float dy = -0.5f * 0.25f * m_footprints[m_heldObject.object_type].getHeight(m_heldObject.rotation);// + 0.125f;
+
+    // Get values for Place and Array Index from cursor xy
+    indexFromPoint(cursor_place, cursor_i, cursor_j, m_rs->m_cursorX + dx, m_rs->m_cursorY + dy);
+  }
+}
+
+
 void ActionManager::action()
 {
-  int i = 0;
-  int j = 0;
   bool onShip = false;
   bool onStation = false;
 
-  // Get values for Place and Array Index from cursor xy
-  int place = 0;
-  indexFromPoint(place, i, j, m_rs->m_cursorX, m_rs->m_cursorY);
-  onStation = (place == 0);
-  onShip = (place == 1);
-
   //std::cout << "Action" << i << " "<< j << std::endl;
   //std::cout << "Action " << m_rs->m_cursorX << " " << m_rs->m_cursorY << std::endl;
-
 
   std::vector<StationObject>& objectsOnShip = m_station->m_dockedShip.m_objects;
 
   // Put down anywhere
   if (m_holding)
   {
-    int di = square_offsets[m_heldObject.object_type][m_heldObject.rotation].x;
-    int dj = square_offsets[m_heldObject.object_type][m_heldObject.rotation].y;
+    move_mouse();
+    if (cursor_place == -1) return;
+
+    onStation = (cursor_place == 0);
+    onShip = (cursor_place == 1);
 
     // First.. can it fit here
-    if (canPlace(place, i+di, j+dj, m_heldObject))
+    if (canPlace(cursor_place, cursor_i, cursor_j, m_heldObject))
     {
       // Now... do we allow it
-      if ((place == 1 && m_returnToShip) ||   // stay on ship
-          (place == 0 && m_returnToStation) || // stay on platform
-          (place == 0 && m_station->m_clams >= m_heldObject.cost && (m_heldObject.cost==0 || m_heldObject.object_type != m_station->m_dockedShip.encounter_mod)) || // purchase
-          (place == 1 && m_heldObject.cost && m_heldObject.object_type == m_station->m_dockedShip.encounter_mod)) // sell
+      bool buying = (cursor_place == 0 && m_returnToShip);
+      bool selling = (cursor_place == 1 && m_returnToStation);
+      bool canSell = m_station->m_dockedShip.encounter_type == 0 && m_heldObject.cost && m_heldObject.object_type == m_station->m_dockedShip.encounter_mod;
+      bool canBuy = (m_station->m_dockedShip.encounter_type == 0 && m_station->m_clams >= m_heldObject.cost && m_heldObject.object_type != m_station->m_dockedShip.encounter_mod) || // && (m_heldObject.cost==0 || m_heldObject.object_type != m_station->m_dockedShip.encounter_mod))
+                    (m_station->m_dockedShip.encounter_type == 1);
+      if ((cursor_place == 1 && m_returnToShip) ||   // stay on ship
+          (cursor_place == 0 && m_returnToStation) || // stay on platform
+          (buying && canBuy) || // purchase
+          (selling && canSell)) // sell
       {
         // Buy from ship ?
-        if (place == 0 && m_returnToShip)
+        if (buying)
         {
           m_station->m_clams -= m_heldObject.cost;
         }
 
         // Sell to ship
-        if (place == 1 && m_returnToStation)
+        if (selling)
         {
           m_station->m_clams += m_heldObject.sell_price;
         }
 
         // Place it
-        placeItem(place, i+di, j+dj, m_heldObject);
+        placeItem(cursor_place, cursor_i, cursor_j, m_heldObject);
         m_holding = false;
 
         // move lists
-        if (place == 0) // Station -> Ship
+        if (cursor_place == 0) // Station -> Ship
         {
           m_objects.push_back(m_heldObject);
           //std::cout << " -> Station"<< std::endl;
         }
-        if (place == 1) // Ship -> Station
+        if (cursor_place == 1) // Ship -> Station
         {
           objectsOnShip.push_back(m_heldObject);
           //std::cout << " -> Ship"<< std::endl;
@@ -393,13 +297,19 @@ void ActionManager::action()
     {
 
     }
-
-
-
   }
   else
   {
     // Pick up ?
+
+    // Get values for Place and Array Index from cursor xy
+    int i = 0;
+    int j = 0;
+    int place = 0;
+    indexFromPoint(place, i, j, m_rs->m_cursorX - 0.125, m_rs->m_cursorY - 0.125); // counter std::round
+    onStation = (place == 0);
+    onShip = (place == 1);
+    if (place == -1) return;
 
     // Check the  array
     int a = onStation ? m_stationArray[i][j] : m_shipArray[i][j];
@@ -416,7 +326,7 @@ void ActionManager::action()
         {
           m_heldObject = m_objects[i];
           m_objects.erase(m_objects.begin() + i);
-          std::cout << "Station ->"<< std::endl;
+          //std::cout << "Station ->"<< std::endl;
           break;
         }
       }
@@ -427,7 +337,7 @@ void ActionManager::action()
         {
           m_heldObject = objectsOnShip[i];
           objectsOnShip.erase(objectsOnShip.begin() + i);
-          std::cout << "Ship ->"<< std::endl;
+          //std::cout << "Ship ->"<< std::endl;
           break;
         }
       }
@@ -445,7 +355,7 @@ void ActionManager::action()
 
 bool ActionManager::canPlace(int place, int i0, int j0, StationObject& o)
 {
-  glm::mat4 footprint = footprints[o.object_type];
+  Footprint& footprint = m_footprints[o.object_type];
 
   int(& array)[15][15] = ( place == 0 ) ? m_stationArray : m_shipArray;
 
@@ -461,13 +371,12 @@ bool ActionManager::canPlace(int place, int i0, int j0, StationObject& o)
     h = 4;
   }
 
-  const float* pFootprint = (const float*)glm::value_ptr(footprint);
-  for (int i = 0; i < 4; ++i)
+  // Test footprint
+  for (int i = 0; i < footprint.getWidth(o.rotation); ++i)
   {
-    for (int j = 0; j < 4; ++j)
+    for (int j = 0; j < footprint.getHeight(o.rotation); ++j)
     {
-      float x = getFootprint(i, j, o);
-      if (x > 0.5f)
+      if (footprint.getPoint(i, j, o.rotation))
       {
         if (i0+i < 0) return false;
         if (j0+j < 0) return false;
@@ -486,19 +395,17 @@ void ActionManager::placeItem(int place, int i0, int j0, StationObject& o)
   o.i = i0;
   o.j = j0;
 
-  glm::mat4 footprint = footprints[o.object_type];
+  Footprint& footprint = m_footprints[o.object_type];
 
   int(& array)[15][15] = ( place == 0 ) ? m_stationArray : m_shipArray;
 
-  const float* pFootprint = (const float*)glm::value_ptr(footprint);
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < footprint.getWidth(o.rotation); ++i)
   {
-    for (int j = 0; j < 4; ++j)
+    for (int j = 0; j < footprint.getHeight(o.rotation); ++j)
     {
-      float x = getFootprint(i, j, o);
-      if (x > 0.5f)
+      if (footprint.getPoint(i, j, o.rotation))
       {
-          array[i0+i][j0+j] = o.id;
+        array[i0+i][j0+j] = o.id;
       }
     }
   }
@@ -526,17 +433,15 @@ void ActionManager::clearItem(int place, int i, int j)
 
 void ActionManager::clearItem(int place, StationObject& o)
 {
-  glm::mat4 footprint = footprints[o.object_type];
+  Footprint& footprint = m_footprints[o.object_type];
 
   int(& array)[15][15] = ( place == 0 ) ? m_stationArray : m_shipArray;
 
-  const float* pFootprint = (const float*)glm::value_ptr(footprint);
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < footprint.getWidth(o.rotation); ++i)
   {
-    for (int j = 0; j < 4; ++j)
+    for (int j = 0; j < footprint.getHeight(o.rotation); ++j)
     {
-      float x = getFootprint(i, j, o);
-      if (x > 0.5f)
+      if (footprint.getPoint(i, j, o.rotation))
       {
           array[o.i+i][o.j+j] = 0;
       }
@@ -551,11 +456,12 @@ bool ActionManager::indexFromPoint(int& place, int& i, int& j, float x, float y)
   float y0;
   int w;
   int h;
-  float s = 0.25f;
+  float s = 0.25f; // Grid side length
   float s_inv = 4.f;
 
   for (int k = 0; k <= 1; ++k)
   {
+    // CO-ordinate
     if (k == 0) // Station
     {
       x0 = -1.88f;
@@ -563,18 +469,22 @@ bool ActionManager::indexFromPoint(int& place, int& i, int& j, float x, float y)
       w = 15;
       h = 7;
     }
-    else // Ship
+    else if (k == 1) // Ship
     {
       x0 = -1.f;
-      y0 =  -2.5f;
+      y0 = -2.5f;
       w = 8;
       h = 4;
     }
 
-    if (x > x0 && x < x0+s*(float)w && y > y0 && y < y0+s*(float)h)
+    // Check grid place
+    if (x > x0 - 0.125f &&
+        x < x0+s*(float)w - 0.125f &&
+        y > y0 - 0.125f
+        && y < y0+s*(float)h - 0.125f)
     {
-      i = (int)((x - x0) * s_inv);
-      j = (int)((y - y0) * s_inv);
+      i = std::round((x - x0) * s_inv);
+      j = std::round((y - y0) * s_inv);
       place = k;
       if (i > w) i = w;
       if (j > h) j = h;
@@ -585,15 +495,16 @@ bool ActionManager::indexFromPoint(int& place, int& i, int& j, float x, float y)
     }
   }
 
+  place = -1;
   return false;
 }
 
 
 void ActionManager::pointFromIndex(int place, int i, int j, glm::vec3& translation)
 {
-  float x0;
-  float y0;
-  float z0;
+  float x0 = 0.f;
+  float y0 = 0.f;
+  float z0 = 0.f;
   float s = 0.25f;
 
   if (place == 0) // Station
@@ -602,7 +513,7 @@ void ActionManager::pointFromIndex(int place, int i, int j, glm::vec3& translati
     y0 = -0.88f;
     z0 =  0.f;
   }
-  else // Ship
+  else if (place == 1) // Ship
   {
     x0 = -1.f;
     y0 = -2.5f;
@@ -624,14 +535,14 @@ void ActionManager::placeArray(std::vector<StationObject>& array, int i, int j, 
 
 float ActionManager::getFootprint(int i, int j, StationObject& o)
 {
-  glm::mat4 footprint = footprints[o.object_type];
-  const float* pFootprint = (const float*)glm::value_ptr(footprint);
+  // glm::mat4 footprint = footprints[o.object_type];
+  // const float* pFootprint = (const float*)glm::value_ptr(footprint);
 
   float x = 0.f;
-  if (o.rotation == 0) x = pFootprint[i*4 + j];
-  if (o.rotation == 1) x = pFootprint[(j)*4 + (3-i)];
-  if (o.rotation == 2) x = pFootprint[(3-i)*4 + (3-j)];
-  if (o.rotation == 3) x = pFootprint[(3-j)*4 + (i)];
+  // if (o.rotation == 0) x = pFootprint[i*4 + j];
+  // if (o.rotation == 1) x = pFootprint[(j)*4 + (3-i)];
+  // if (o.rotation == 2) x = pFootprint[(3-i)*4 + (3-j)];
+  // if (o.rotation == 3) x = pFootprint[(3-j)*4 + (i)];
   return x;
 }
 

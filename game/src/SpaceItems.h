@@ -19,6 +19,24 @@ protected:
 };
 
 
+// Need one of these for every object type
+class Footprint
+{
+public:
+  Footprint(int id);
+  ~Footprint();
+
+  int getHeight(int rotation);
+  int getWidth(int rotation);
+  int getPoint(int i, int j, int rotation);
+
+protected:
+  int height;
+  int width;
+  std::vector<int> array;
+};
+
+
 // An object that you can move around
 class StationObject
 {

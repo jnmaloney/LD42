@@ -36,6 +36,13 @@ void YourStation::launch()
   m_dockedShip.docked = -1;
   m_dockedShip.timer = -1.f;
 
+  // Special event [ asteroid ]
+  // if (dice() == 1)
+  // {
+  //   int d = 0;
+  //   if ()
+  // }
+
 
   // Set up the next encounter
   int d = dice();
@@ -65,7 +72,7 @@ void YourStation::launch()
     --m_asteroidCounter;
     if (m_asteroidCounter == 0)
     {
-      m_asteroidCounter = 2;
+      m_asteroidCounter = 2 + dice2()%2;
       m_dockedShip.encounter_type = 2; // Take Cover
     }
     else

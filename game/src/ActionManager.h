@@ -14,8 +14,24 @@ public:
   ActionManager();
   ~ActionManager();
 
+  void move_mouse();
   void action();
   void cancel();
+
+  void reset()
+  {
+    gameOver = false;
+
+    m_crashed1 = false;
+    m_crashed2 = false;
+    m_crashed3 = false;
+    m_objects.clear();
+    m_holding = false;
+    cursor_place = -1;
+    memset(m_stationArray, 0, 15*15*sizeof(int));
+    memset(m_shipArray, 0, 15*15*sizeof(int));
+    doMask();
+  }
 
   RenderSystem* m_rs;
   YourStation* m_station;
@@ -41,9 +57,11 @@ public:
   bool indexFromPoint(int& place, int& i, int& j, float x, float y);
   void pointFromIndex(int place, int i, int j, glm::vec3& translation);
 
-  std::vector<glm::mat4> footprints;
-  std::vector<std::vector<glm::vec3 > > offsets;
-  std::vector<std::vector<glm::vec3 > > square_offsets;
+  int cursor_place = 0;
+  int cursor_i = 0;
+  int cursor_j = 0;
+
+  std::vector<Footprint> m_footprints;
 
   StationObject nullObject;
   StationObject m_heldObject = nullObject;
